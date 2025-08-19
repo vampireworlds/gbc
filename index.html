@@ -214,27 +214,19 @@
             border: 1px solid transparent;
         }
 
-        .nav-menu a::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-gold);
-            transition: left 0.4s ease;
-            z-index: -1;
-        }
-
-        .nav-menu a:hover::before {
-            left: 0;
-        }
-
-        .nav-menu a:hover {
-            color: var(--rich-black);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        .nav-menu a:hover,
+        .nav-menu a:focus {
+            background: var(--primary-gold);
+            color: var(--rich-black) !important;
             border-color: var(--primary-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .nav-menu a.active {
+            background: var(--primary-gold);
+            color: var(--rich-black) !important;
+            border: 1px solid var(--primary-gold);
         }
 
         /* Modal Styles */
@@ -787,9 +779,10 @@
                 padding: 10px;
             }
 
-            .lang-btn {
-                width: 40px;
-                height: 28px;
+            .language-selector .lang-btn {
+                width: 35px;
+                height: 24px;
+                opacity: 0.85;
             }
 
             .header-content {
@@ -1051,6 +1044,18 @@
             animation: fadeInUp 0.8s ease-out;
         }
 
+        /* Smooth fade/slide animation for main sections */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1s cubic-bezier(0.23, 1, 0.32, 1), transform 1s cubic-bezier(0.23, 1, 0.32, 1);
+            will-change: opacity, transform;
+        }
+        .fade-in-section.visible {
+            opacity: 1;
+            transform: none;
+        }
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -1068,47 +1073,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--dark-gold);
         }
-    
-/* ========== FIXES 2.0 ========== */
-
-/* 1. Language selector auf Handy nur kleiner machen (weiter klickbar) */
-@media (max-width: 768px) {
-    .language-selector .lang-btn {
-        width: 35px;
-        height: 24px;
-        opacity: 0.85;
-    }
-}
-
-/* 2. Navigation Farben fixen (kein ::before Effekt mehr) */
-.nav-menu a {
-    background: transparent;
-    color: var(--white);
-    border: 1px solid transparent;
-    position: relative;
-    z-index: 1;
-}
-
-.nav-menu a::before {
-    content: none !important; /* Gold-Hintergrund Balken deaktiviert */
-}
-
-.nav-menu a:hover,
-.nav-menu a:focus {
-    background: var(--primary-gold);
-    color: var(--rich-black) !important;
-    border-color: var(--primary-gold);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4);
-}
-
-.nav-menu a.active {
-    background: var(--primary-gold);
-    color: var(--rich-black) !important;
-    border: 1px solid var(--primary-gold);
-}
-
-</style>
+    </style>
 </head>
 <body>
     <!-- Language Selector -->
@@ -1124,7 +1089,7 @@
             <span class="close" onclick="closeBookingModal()">&times;</span>
             <h2 id="booking-title" style="font-family: 'Playfair Display', serif; color: var(--primary-gold); font-size: 2.2rem; margin-bottom: 30px;">Termin buchen</h2>
             
-            <form id="bookingForm" class="booking-form">
+            <form id="bookingForm" class="booking-form" method="POST" autocomplete="off">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName" id="label-firstname">Vorname *</label>
@@ -1151,13 +1116,76 @@
                     <label for="service" id="label-service">Dienstleistung *</label>
                     <select id="service" name="service" required>
                         <option value="" id="option-select">Bitte wählen Sie eine Dienstleistung</option>
-                        <option value="hautpflege" id="option-skincare">Hautpflege für alle Hauttypen</option>
-                        <option value="diplomprogramm" id="option-diploma">Diplomprogramm (3.000 €)</option>
-                        <option value="fachkosmetik" id="option-cosmetics">Fachkosmetik (3.500 €)</option>
-                        <option value="face-beauty" id="option-face">Face-Beauty-Kurs (2.500 €)</option>
-                        <option value="friseur" id="option-hairdresser">Friseur/Kosmetiker (3.500 €)</option>
-                        <option value="trainer" id="option-trainer">Beauty-Trainer Zertifikat (2.500 €)</option>
-                        <option value="beratung" id="option-consultation">Beratungsgespräch</option>
+                        <optgroup label="Braut- & Abendstyling">
+                            <option>Braut Make-up & Haarstyling</option>
+                            <option>Abend-Make-up & Frisuren</option>
+                            <option>Verleih & Verkauf von Braut-, Abend- und traditionellen Kleidern (inkl. kurdischer Kleider)</option>
+                        </optgroup>
+                        <optgroup label="Haarpflege & Styling">
+                            <option>Haarschnitt, Föhnen, Strähnen</option>
+                            <option>Haarfärbung</option>
+                            <option>Haarprotein-Behandlungen</option>
+                            <option>Professionelle Haarstylings</option>
+                        </optgroup>
+                        <optgroup label="Beauty & Kosmetik">
+                            <option>Schminken für jeden Anlass</option>
+                            <option>Augenbrauen zupfen & färben (Faden-Technik)</option>
+                            <option>Wimpernverlängerung & Wimpernlifting</option>
+                            <option>Microblading & Browlifting</option>
+                            <option>Permanentes Make-up (Lidstrich, Lippenpigmentierung, Augenbrauen)</option>
+                            <option>BB Glow Behandlung</option>
+                            <option>Hydrafacial-Behandlung</option>
+                            <option>Gesichtsreinigung</option>
+                            <option>Hautpflege</option>
+                            <option>Carbon Peeling: 70€, 1 Std.</option>
+                            <option>Kristallpeeling: 50€, 30 Min.</option>
+                            <option>Peeling (grün/Algen): 70€, 30 Min.</option>
+                            <option>Dermapen: 70€, 40 Min.</option>
+                            <option>Plasma Pen: 25–70€, 1 Std.</option>
+                            <option>Beauty Injektion / Glow: 250€, 30 Min.</option>
+                            <option>Mesotherapie Gesicht & Haare: 200€, 30 Min.</option>
+                            <option>Mesotherapie Haare: 150€, 30 Min.</option>
+                            <option>Fettlösendes Injektionslipom (Bauch/Backen): 70–150€, 30 Min.</option>
+                        </optgroup>
+                        <optgroup label="Botox & Filler">
+                            <option>Botox (Stirn & Augenbereich, Zornesfalten): 250€, 30 Min.</option>
+                            <option>Filler Lippen (1 ml): 250€, 30 Min.</option>
+                            <option>Filler Lachfalten: 250€, 30 Min.</option>
+                            <option>Fettlösendes Injektionslipom Bauch: 150€, 30 Min.</option>
+                        </optgroup>
+                        <optgroup label="Haarentfernung & Laser">
+                            <option>Laser Achseln: 35€, 15 Min.</option>
+                            <option>Laser Hände (komplett): 35€, 10 Min.</option>
+                            <option>Laser Beine (komplett): 60€, 30 Min.; Beine halb: 35€, 20 Min.</option>
+                            <option>Laser Gesicht: 35€, 20 Min.</option>
+                            <option>Laser Bikini: 40€, 20 Min.</option>
+                            <option>Laser Bauch & Rücken: 60€, 30 Min.</option>
+                            <option>Laser Kinn & Oberlippe: 25€, 5 Min.</option>
+                            <option>Laser dauerhafte Haarentfernung (Ganzkörper): 170€, ab 1,5 Std., Anzahl Sitzungen je nach Körper</option>
+                        </optgroup>
+                        <optgroup label="Wimpern & Augenbrauen">
+                            <option>Wimpernverlängerung: 50€, 1 Std.</option>
+                            <option>Augenbrauen färben: 30€, 30 Min.</option>
+                            <option>Augenbrauen zupfen / Formen: 25€, 15 Min.</option>
+                            <option>Microblading Augenbrauen (2 Sitzungen): 150€, 1 Std.</option>
+                            <option>Augenbrauen Härchen für Härchen (2 Sitzungen): 170€, 2 Std., Abstand zwischen Sitzungen: 1 Monat</option>
+                        </optgroup>
+                        <optgroup label="Make-up & Nägel">
+                            <option>Make-up normal: 35€, 1 Std.</option>
+                            <option>Braut-Make-up: 70€, 1 Std.</option>
+                            <option>Nägel / Nageldesign: ab 35–50€, 40 Min.</option>
+                        </optgroup>
+                        <optgroup label="Fußpflege">
+                            <option>Fußpflege</option>
+                        </optgroup>
+                        <optgroup label="Zahnpflege">
+                            <option>Zahnaufhellung: 50€, 30 Min., Anzahl Sitzungen je nach Zustand</option>
+                        </optgroup>
+                        <optgroup label="Body Treatments & Massagen">
+                            <option>Fettverbrennung mit Gerät / Körperformung: 70€, 1 Std., Anzahl Sitzungen je nach Zustand</option>
+                            <option>Körpermassage</option>
+                            <option>Kollagenfäden</option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -1180,14 +1208,21 @@
                             <div class="time-slot" data-time="17:00">17:00</div>
                             <div class="time-slot" data-time="18:00">18:00</div>
                         </div>
-                        <input type="hidden" id="selectedTime" name="selectedTime" required>
+                        <input type="hidden" id="selectedTime" name="time" required>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="notes" id="label-notes">Zusätzliche Notizen</label>
-                    <textarea id="notes" name="notes" rows="4" placeholder="Besondere Wünsche oder Anmerkungen..."></textarea>
+                    <textarea id="notes" name="message" rows="4" placeholder="Besondere Wünsche oder Anmerkungen..."></textarea>
                 </div>
+
+                <!-- Hidden fields for Formspree to organize the data -->
+                <input type="hidden" name="_subject" value="Neue Terminbuchung - Gasal Beauty Center">
+                <input type="hidden" name="_cc" value="info@mail.gbc-halle.top">
+                <!-- _next field fully removed to prevent redirect -->
+                <input type="hidden" name="bookingId" id="bookingId" value="">
+                <input type="hidden" name="language" id="formLanguage" value="de">
 
                 <button type="submit" class="btn-submit" id="submit-btn">Termin buchen</button>
             </form>
@@ -1237,27 +1272,27 @@
             <!-- Stats Section -->
             <div class="stats">
                 <div class="stat-card">
-                    <div class="stat-number">24</div>
+                    <div class="stat-number" id="stat-number-years">24</div>
                     <div class="stat-label" id="stat-years">Jahre Erfahrung</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">8,000+</div>
+                    <div class="stat-number" id="stat-number-customers">8,000+</div>
                     <div class="stat-label" id="stat-customers">Zufriedene Kunden</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">5</div>
+                    <div class="stat-number" id="stat-number-programs">5</div>
                     <div class="stat-label" id="stat-programs">Ausbildungsprogramme</div>
                 </div>
             </div>
 
             <!-- About Section -->
-            <div class="section" id="about">
+            <div class="section fade-in-section" id="about">
                 <h2 id="about-title">Über uns</h2>
                 <p id="about-content">Unser Beauty Center bietet seit 24 Jahren professionelle Schönheits- und Körperpflegedienstleistungen. Mit über 8.000 zufriedenen Kunden sind wir stolz darauf, nicht nur erstklassige Behandlungen anzubieten, sondern auch akkreditierte Berufsausbildungen im Beauty-Bereich durchzuführen.</p>
             </div>
 
             <!-- Services Section -->
-            <div class="section" id="services">
+            <div class="section fade-in-section" id="services">
                 <h2 id="services-title">Dienstleistungen & Produkte</h2>
                 <div class="services-grid">
                     <div class="service-card">
@@ -1279,35 +1314,98 @@
             <div class="section" id="education">
                 <h2 id="education-title">Berufsausbildung Programme</h2>
                 <div class="services-grid">
-                    <div class="service-card">
-                        <h3 id="program-diploma">Diplomprogramm</h3>
-                        <div class="price">3.000 €</div>
-                        <p id="program-diploma-desc">3–6 Monate • 8 Zertifikate • Sprache: Arabisch & Kurdisch</p>
-                        <p id="program-diploma-features">Fettabbau, Laser-Haarentfernung, Zahnaufhellung, Tattooentfernung und mehr.</p>
+                    <!-- Block 1: Fachkosmetik -->
+                    <div class="service-card edu-block">
+                        <h3 id="edu-block1-title">1. Abteilung: Haut- und Kosmetikbehandlungen (Fachkosmetik)</h3>
+                        <div class="price"><span id="program-cosmetics-price">3.500 €</span></div>
+                        <p><strong id="edu-block1-duration-label">Dauer:</strong> <span id="edu-block1-duration">6 Monate</span></p>
+                        <p id="edu-block1-desc">Bereits zwei Monate nach dem Abschluss können die Teilnehmer:innen ein eigenes Studio eröffnen, von zu Hause aus arbeiten oder in einem Kosmetikzentrum tätig werden.</p>
+                        <strong id="edu-block1-content-label">Schulungsinhalte:</strong>
+                        <ul>
+                            <li id="edu-block1-content1">Hautanalyse</li>
+                            <li id="edu-block1-content2">Haarwurzelanalyse</li>
+                            <li id="edu-block1-content3">HydraFacial</li>
+                            <li id="edu-block1-content4">Dermapen (Microneedling)</li>
+                            <li id="edu-block1-content5">Plasma Pen</li>
+                            <li id="edu-block1-content6">Algenpeeling</li>
+                            <li id="edu-block1-content7">Green Peel (Kräuterpeeling)</li>
+                            <li id="edu-block1-content8">Kristallpeeling</li>
+                            <li id="edu-block1-content9">Kollagen-Fäden</li>
+                            <li id="edu-block1-content10">Fruchtsäurepeeling</li>
+                            <li id="edu-block1-content11">Carbon Peeling</li>
+                            <li id="edu-block1-content12">Schröpftherapie (Physiotherapie-Technik)</li>
+                        </ul>
+                        <strong id="edu-block1-degree-label">Abschluss:</strong>
+                        <ul>
+                            <li id="edu-block1-degree1">12 Basiszertifikate</li>
+                            <li id="edu-block1-degree2">+ 5 Bonus-Zertifikate: Oxygen Bubbles, Morpheus, Mesotherapie, BB Glow, Vascular Removal</li>
+                        </ul>
                     </div>
-                    <div class="service-card">
-                        <h3 id="program-cosmetics">Fachkosmetik</h3>
-                        <div class="price">3.500 €</div>
-                        <p id="program-cosmetics-desc">3–6 Monate • 8 Zertifikate • 4 Geräte inklusive</p>
-                        <p id="program-cosmetics-features">Dermapen, Plasma Pen, Hydrafacial, Hautanalysen und mehr.</p>
+                    <!-- Block 2: Laser- und Strahlentechnologien -->
+                    <div class="service-card edu-block">
+                        <h3 id="edu-block2-title">2. Abteilung: Diplom in Laser- und Strahlentechnologien</h3>
+                        <div class="price"><span id="program-diploma-price">3.000 €</span></div>
+                        <p><strong id="edu-block2-duration-label">Dauer:</strong> <span id="edu-block2-duration">4 Monate</span></p>
+                        <strong id="edu-block2-content-label">Schulungsinhalte:</strong>
+                        <ul>
+                            <li id="edu-block2-content1">Dauerhafte Haarentfernung mit Laser</li>
+                            <li id="edu-block2-content2">Fettreduktion (Fettabbau)</li>
+                            <li id="edu-block2-content3">Zahnaufhellung</li>
+                            <li id="edu-block2-content4">Behandlung von Gefäßverschlüssen</li>
+                            <li id="edu-block2-content5">Carbon Peeling</li>
+                            <li id="edu-block2-content6">Tattooentfernung</li>
+                            <li id="edu-block2-content7">Fractional Laser (CO₂)</li>
+                            <li id="edu-block2-content8">HIFU (hochintensiver fokussierter Ultraschall)</li>
+                            <li id="edu-block2-content9">FUS-Beflica</li>
+                            <li id="edu-block2-content10">Nagelmodellage</li>
+                            <li id="edu-block2-content11">Elektroepilation (weiße Haare)</li>
+                        </ul>
+                        <strong id="edu-block2-degree-label">Abschluss:</strong>
+                        <ul>
+                            <li id="edu-block2-degree1">7 Basiszertifikate</li>
+                            <li id="edu-block2-degree2">+ 5 Bonus-Zertifikate: Hautanalyse, Schröpftherapie, Oxygen Bubbles, Mesotherapie für Haare, Lippenpigmentierung</li>
+                        </ul>
                     </div>
-                    <div class="service-card">
-                        <h3 id="program-face">Face-Beauty-Kurs</h3>
-                        <div class="price">2.500 €</div>
-                        <p id="program-face-desc">2 Monate • 8 Zertifikate • 3 Geräte inklusive</p>
-                        <p id="program-face-features">Microblading, Wimpernverlängerung, Brow Lifting und mehr.</p>
+                    <!-- Block 3: Medizinische Kosmetik -->
+                    <div class="service-card edu-block">
+                        <h3 id="edu-block3-title">3. Abteilung: Medizinische Kosmetik</h3>
+                        <div class="price"><span id="program-face-price">2.500 €</span></div>
+                        <p><strong id="edu-block3-duration-label">Dauer:</strong> <span id="edu-block3-duration">3 Monate – 1 Tag pro Woche (10:00 – 15:00 Uhr)</span></p>
+                        <strong id="edu-block3-content-label">Schulungsinhalte:</strong>
+                        <ul>
+                            <li id="edu-block3-content1">Hautbehandlungen mit Hyaluron</li>
+                            <li id="edu-block3-content2">Wachstumsstimulation für Haare und Gesicht</li>
+                            <li id="edu-block3-content3">Injektionsbehandlungen zur Fettauflösung (Kinn & Bauch)</li>
+                            <li id="edu-block3-content4">Mesotherapie-Injektionen</li>
+                        </ul>
+                        <strong id="edu-block3-degree-label">Abschluss:</strong>
+                        <ul>
+                            <li id="edu-block3-degree1">7 Basiszertifikate</li>
+                            <li id="edu-block3-degree2">+ 3 Bonus-Zertifikate: BB Face, Astaxanthin-Serum, Elektroepilation (weiße Haare)</li>
+                        </ul>
                     </div>
-                    <div class="service-card">
-                        <h3 id="program-hairdresser">Friseur/Kosmetiker</h3>
-                        <div class="price">3.500 €</div>
-                        <p id="program-hairdresser-desc">3–6 Monate • 6 Zertifikate</p>
-                        <p id="program-hairdresser-features">Haarschnitte, Brautfrisuren, Make-up, Haarfärbung und mehr.</p>
-                    </div>
-                    <div class="service-card">
-                        <h3 id="program-trainer">Beauty-Trainer Zertifikat</h3>
-                        <div class="price">2.500 €</div>
-                        <p id="program-trainer-desc">1 Monat • Fach Dozent</p>
-                        <p id="program-trainer-features">Ausbildung zum Beauty-Trainer mit eigenen Schulungsmöglichkeiten.</p>
+                    <!-- Block 4: Weiterbildung für Friseur:innen -->
+                    <div class="service-card edu-block">
+                        <h3 id="edu-block4-title">4. Abteilung: Weiterbildung für Friseur:innen</h3>
+                        <div class="price"><span id="program-hairdresser-price">3.500 €</span></div>
+                        <p><strong id="edu-block4-duration-label">Dauer:</strong> <span id="edu-block4-duration">2 Monate</span></p>
+                        <strong id="edu-block4-content-label">Schulungsinhalte:</strong>
+                        <ul>
+                            <li id="edu-block4-content1">Haarpflege mit Protein</li>
+                            <li id="edu-block4-content2">Haarglättung</li>
+                            <li id="edu-block4-content3">Haarfärbungen & Strähnentechniken</li>
+                            <li id="edu-block4-content4">Haarschnitte & Stylings</li>
+                            <li id="edu-block4-content5">Extensions</li>
+                            <li id="edu-block4-content6">Make-up</li>
+                            <li id="edu-block4-content7">Augenbrauenstyling</li>
+                            <li id="edu-block4-content8">Augenbrauen- und Wimpernlifting</li>
+                            <li id="edu-block4-content9">Wimpernverlängerung</li>
+                        </ul>
+                        <strong id="edu-block4-degree-label">Abschluss:</strong>
+                        <ul>
+                            <li id="edu-block4-degree1">Basiszertifikate</li>
+                            <li id="edu-block4-degree2">+ Bonus-Zertifikate: Lippenpigmentierung, Eyeliner (Permanent Make-up), Augenbrauen-Permanent Make-up, Augenbrauenzeichnen & -reinigung, Microblading</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -1327,21 +1425,21 @@
                         <span class="contact-icon">📞</span>
                         <div>
                             <strong id="phone-label">Telefon:</strong><br>
-                            0163 9244456
+                            <span id="contact-phone">0163 9244456</span>
                         </div>
                     </div>
                     <div class="contact-item">
                         <span class="contact-icon">📧</span>
                         <div>
                             <strong id="email-label">E-Mail:</strong><br>
-                            info@mail.gbc-halle.top
+                            <span id="contact-email">info@mail.gbc-halle.top</span>
                         </div>
                     </div>
                     <div class="contact-item">
                         <span class="contact-icon">🌐</span>
                         <div>
                             <strong id="website-label">Website:</strong><br>
-                            gbc-halle.top
+                            <span id="contact-website">gbc-halle.top</span>
                         </div>
                     </div>
                 </div>
@@ -1350,6 +1448,20 @@
     </div>
 
     <script>
+        // Smooth fade-in on scroll for main sections
+        document.addEventListener('DOMContentLoaded', function() {
+            function revealOnScroll() {
+                document.querySelectorAll('.fade-in-section').forEach(function(section) {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top < window.innerHeight - 80) {
+                        section.classList.add('visible');
+                    }
+                });
+            }
+            window.addEventListener('scroll', revealOnScroll);
+            revealOnScroll();
+        });
+
         const translations = {
             de: {
                 'logo-text': 'Gasal Beauty Center',
@@ -1369,27 +1481,14 @@
                 'about-content': 'Unser Beauty Center bietet seit 24 Jahren professionelle Schönheits- und Körperpflegedienstleistungen. Mit über 8.000 zufriedenen Kunden sind wir stolz darauf, nicht nur erstklassige Behandlungen anzubieten, sondern auch akkreditierte Berufsausbildungen im Beauty-Bereich durchzuführen.',
                 'services-title': 'Dienstleistungen & Produkte',
                 'service-skincare': 'Hautpflege für alle Hauttypen',
-                'service-skincare-desc': 'Professionelle Behandlungen für jeden Hauttyp mit modernsten Technologien.',
                 'service-wholesale': 'Großhandel',
-                'service-wholesale-desc': 'Kosmetika, Geräte & Friseurmaterialien im Großhandel verfügbar.',
                 'service-equipment': 'Geräteverkauf',
-                'service-equipment-desc': 'Kauf & Ratenzahlung inklusive Zertifikat & Schulung als Geschenk.',
                 'education-title': 'Berufsausbildung Programme',
                 'program-diploma': 'Diplomprogramm',
-                'program-diploma-desc': '3–6 Monate • 8 Zertifikate • Sprache: Arabisch & Kurdisch',
-                'program-diploma-features': 'Fettabbau, Laser-Haarentfernung, Zahnaufhellung, Tattooentfernung und mehr.',
                 'program-cosmetics': 'Fachkosmetik',
-                'program-cosmetics-desc': '3–6 Monate • 8 Zertifikate • 4 Geräte inklusive',
-                'program-cosmetics-features': 'Dermapen, Plasma Pen, Hydrafacial, Hautanalysen und mehr.',
                 'program-face': 'Face-Beauty-Kurs',
-                'program-face-desc': '2 Monate • 8 Zertifikate • 3 Geräte inklusive',
-                'program-face-features': 'Microblading, Wimpernverlängerung, Brow Lifting und mehr.',
                 'program-hairdresser': 'Friseur/Kosmetiker',
-                'program-hairdresser-desc': '3–6 Monate • 6 Zertifikate',
-                'program-hairdresser-features': 'Haarschnitte, Brautfrisuren, Make-up, Haarfärbung und mehr.',
                 'program-trainer': 'Beauty-Trainer Zertifikat',
-                'program-trainer-desc': '1 Monat • Fach Dozent',
-                'program-trainer-features': 'Ausbildung zum Beauty-Trainer mit eigenen Schulungsmöglichkeiten.',
                 'contact-title': 'Standort & Kontakt',
                 'address-label': 'Adresse:',
                 'phone-label': 'Telefon:',
@@ -1406,57 +1505,164 @@
                 'label-notes': 'Zusätzliche Notizen',
                 'submit-btn': 'Termin buchen',
                 'option-select': 'Bitte wählen Sie eine Dienstleistung',
-                'option-skincare': 'Hautpflege für alle Hauttypen',
-                'option-diploma': 'Diplomprogramm (3.000 €)',
-                'option-cosmetics': 'Fachkosmetik (3.500 €)',
-                'option-face': 'Face-Beauty-Kurs (2.500 €)',
-                'option-hairdresser': 'Friseur/Kosmetiker (3.500 €)',
-                'option-trainer': 'Beauty-Trainer Zertifikat (2.500 €)',
-                'option-consultation': 'Beratungsgespräch',
-                'success-title': 'Termin erfolgreich gebucht!',
-                'success-text': 'Ihre Buchungsbestätigung wurde an Ihre E-Mail-Adresse gesendet. Wir freuen uns auf Ihren Besuch!',
-                'error-title': 'Buchung fehlgeschlagen',
-                'error-text': 'Es gab ein Problem bei der Buchung. Bitte versuchen Sie es erneut oder kontaktieren Sie uns direkt.'
+                // Neue Dienstleistungsoptionen (aus <select id="service">)
+                'option-braut-makeup-haar': 'Braut Make-up & Haarstyling',
+                'option-abend-makeup-frisuren': 'Abend-Make-up & Frisuren',
+                'option-verleih-kleider': 'Verleih & Verkauf von Braut-, Abend- und traditionellen Kleidern (inkl. kurdischer Kleider)',
+                'option-haarschnitt-foehnen-straehnen': 'Haarschnitt, Föhnen, Strähnen',
+                'option-haarfaerbung': 'Haarfärbung',
+                'option-haarprotein': 'Haarprotein-Behandlungen',
+                'option-haarstyling': 'Professionelle Haarstylings',
+                'option-schminken-anlass': 'Schminken für jeden Anlass',
+                'option-augenbrauen-faden': 'Augenbrauen zupfen & färben (Faden-Technik)',
+                'option-wimpernverlaengerung-lifting': 'Wimpernverlängerung & Wimpernlifting',
+                'option-microblading-browlifting': 'Microblading & Browlifting',
+                'option-permanent-makeup': 'Permanentes Make-up (Lidstrich, Lippenpigmentierung, Augenbrauen)',
+                'option-bb-glow': 'BB Glow Behandlung',
+                'option-hydrafacial': 'Hydrafacial-Behandlung',
+                'option-gesichtsreinigung': 'Gesichtsreinigung',
+                'option-hautpflege': 'Hautpflege',
+                'option-carbon-peeling': 'Carbon Peeling: 70€, 1 Std.',
+                'option-kristallpeeling': 'Kristallpeeling: 50€, 30 Min.',
+                'option-peeling-gruen-algen': 'Peeling (grün/Algen): 70€, 30 Min.',
+                'option-dermapen': 'Dermapen: 70€, 40 Min.',
+                'option-plasma-pen': 'Plasma Pen: 25–70€, 1 Std.',
+                'option-beauty-injektion-glow': 'Beauty Injektion / Glow: 250€, 30 Min.',
+                'option-mesotherapie-gesicht-haare': 'Mesotherapie Gesicht & Haare: 200€, 30 Min.',
+                'option-mesotherapie-haare': 'Mesotherapie Haare: 150€, 30 Min.',
+                'option-fettloesendes-injektionslipom-bauch-backen': 'Fettlösendes Injektionslipom (Bauch/Backen): 70–150€, 30 Min.',
+                'option-botox-stirn-augen-zornesfalten': 'Botox (Stirn & Augenbereich, Zornesfalten): 250€, 30 Min.',
+                'option-filler-lippen': 'Filler Lippen (1 ml): 250€, 30 Min.',
+                'option-filler-lachfalten': 'Filler Lachfalten: 250€, 30 Min.',
+                'option-fettloesendes-injektionslipom-bauch': 'Fettlösendes Injektionslipom Bauch: 150€, 30 Min.',
+                'option-laser-achseln': 'Laser Achseln: 35€, 15 Min.',
+                'option-laser-haende': 'Laser Hände (komplett): 35€, 10 Min.',
+                'option-laser-beine': 'Laser Beine (komplett): 60€, 30 Min.; Beine halb: 35€, 20 Min.',
+                'option-laser-gesicht': 'Laser Gesicht: 35€, 20 Min.',
+                'option-laser-bikini': 'Laser Bikini: 40€, 20 Min.',
+                'option-laser-bauch-ruecken': 'Laser Bauch & Rücken: 60€, 30 Min.',
+                'option-laser-kinn-oberlippe': 'Laser Kinn & Oberlippe: 25€, 5 Min.',
+                'option-laser-ganzkoerper': 'Laser dauerhafte Haarentfernung (Ganzkörper): 170€, ab 1,5 Std., Anzahl Sitzungen je nach Körper',
+                'option-wimpernverlaengerung': 'Wimpernverlängerung: 50€, 1 Std.',
+                'option-augenbrauen-faerben': 'Augenbrauen färben: 30€, 30 Min.',
+                'option-augenbrauen-zupfen-formen': 'Augenbrauen zupfen / Formen: 25€, 15 Min.',
+                'option-microblading-2sitzungen': 'Microblading Augenbrauen (2 Sitzungen): 150€, 1 Std.',
+                'option-augenbrauen-haerchen-2sitzungen': 'Augenbrauen Härchen für Härchen (2 Sitzungen): 170€, 2 Std., Abstand zwischen Sitzungen: 1 Monat',
+                'option-makeup-normal': 'Make-up normal: 35€, 1 Std.',
+                'option-braut-makeup': 'Braut-Make-up: 70€, 1 Std.',
+                'option-naegel-nageldesign': 'Nägel / Nageldesign: ab 35–50€, 40 Min.',
+                'option-fusspflege': 'Fußpflege',
+                'option-zahnaufhellung': 'Zahnaufhellung: 50€, 30 Min., Anzahl Sitzungen je nach Zustand',
+                'option-fettverbrennung-geraet': 'Fettverbrennung mit Gerät / Körperformung: 70€, 1 Std., Anzahl Sitzungen je nach Zustand',
+                'option-koerpermassage': 'Körpermassage',
+                'option-kollagenfaeden': 'Kollagenfäden',
+                'program-diploma-price': '3.000 €',
+                // Education section (Block 1)
+                'edu-block1-title': '1. Abteilung: Haut- und Kosmetikbehandlungen (Fachkosmetik)',
+                'edu-block1-duration-label': 'Dauer:',
+                'edu-block1-duration': '6 Monate',
+                'edu-block1-desc': 'Bereits zwei Monate nach dem Abschluss können die Teilnehmer:innen ein eigenes Studio eröffnen, von zu Hause aus arbeiten oder in einem Kosmetikzentrum tätig werden.',
+                'edu-block1-content-label': 'Schulungsinhalte:',
+                'edu-block1-content1': 'Hautanalyse',
+                'edu-block1-content2': 'Haarwurzelanalyse',
+                'edu-block1-content3': 'HydraFacial',
+                'edu-block1-content4': 'Dermapen (Microneedling)',
+                'edu-block1-content5': 'Plasma Pen',
+                'edu-block1-content6': 'Algenpeeling',
+                'edu-block1-content7': 'Green Peel (Kräuterpeeling)',
+                'edu-block1-content8': 'Kristallpeeling',
+                'edu-block1-content9': 'Kollagen-Fäden',
+                'edu-block1-content10': 'Fruchtsäurepeeling',
+                'edu-block1-content11': 'Carbon Peeling',
+                'edu-block1-content12': 'Schröpftherapie (Physiotherapie-Technik)',
+                'edu-block1-degree-label': 'Abschluss:',
+                'edu-block1-degree1': '12 Basiszertifikate',
+                'edu-block1-degree2': '+ 5 Bonus-Zertifikate: Oxygen Bubbles, Morpheus, Mesotherapie, BB Glow, Vascular Removal',
+                // Education section (Block 2)
+                'edu-block2-title': '2. Abteilung: Diplom in Laser- und Strahlentechnologien',
+                'edu-block2-duration-label': 'Dauer:',
+                'edu-block2-duration': '4 Monate',
+                'edu-block2-content-label': 'Schulungsinhalte:',
+                'edu-block2-content1': 'Dauerhafte Haarentfernung mit Laser',
+                'edu-block2-content2': 'Fettreduktion (Fettabbau)',
+                'edu-block2-content3': 'Zahnaufhellung',
+                'edu-block2-content4': 'Behandlung von Gefäßverschlüssen',
+                'edu-block2-content5': 'Carbon Peeling',
+                'edu-block2-content6': 'Tattooentfernung',
+                'edu-block2-content7': 'Fractional Laser (CO₂)',
+                'edu-block2-content8': 'HIFU (hochintensiver fokussierter Ultraschall)',
+                'edu-block2-content9': 'FUS-Beflica',
+                'edu-block2-content10': 'Nagelmodellage',
+                'edu-block2-content11': 'Elektroepilation (weiße Haare)',
+                'edu-block2-degree-label': 'Abschluss:',
+                'edu-block2-degree1': '7 Basiszertifikate',
+                'edu-block2-degree2': '+ 5 Bonus-Zertifikate: Hautanalyse, Schröpftherapie, Oxygen Bubbles, Mesotherapie für Haare, Lippenpigmentierung',
+                // Education section (Block 3)
+                'edu-block3-title': '3. Abteilung: Medizinische Kosmetik',
+                'edu-block3-duration-label': 'Dauer:',
+                'edu-block3-duration': '3 Monate – 1 Tag pro Woche (10:00 – 15:00 Uhr)',
+                'edu-block3-content-label': 'Schulungsinhalte:',
+                'edu-block3-content1': 'Hautbehandlungen mit Hyaluron',
+                'edu-block3-content2': 'Wachstumsstimulation für Haare und Gesicht',
+                'edu-block3-content3': 'Injektionsbehandlungen zur Fettauflösung (Kinn & Bauch)',
+                'edu-block3-content4': 'Mesotherapie-Injektionen',
+                'edu-block3-degree-label': 'Abschluss:',
+                'edu-block3-degree1': '7 Basiszertifikate',
+                'edu-block3-degree2': '+ 3 Bonus-Zertifikate: BB Face, Astaxanthin-Serum, Elektroepilation (weiße Haare)',
+                // Education section (Block 4)
+                'edu-block4-title': '4. Abteilung: Weiterbildung für Friseur:innen',
+                'edu-block4-duration-label': 'Dauer:',
+                'edu-block4-duration': '2 Monate',
+                'edu-block4-content-label': 'Schulungsinhalte:',
+                'edu-block4-content1': 'Haarpflege mit Protein',
+                'edu-block4-content2': 'Haarglättung',
+                'edu-block4-content3': 'Haarfärbungen & Strähnentechniken',
+                'edu-block4-content4': 'Haarschnitte & Stylings',
+                'edu-block4-content5': 'Extensions',
+                'edu-block4-content6': 'Make-up',
+                'edu-block4-content7': 'Augenbrauenstyling',
+                'edu-block4-content8': 'Augenbrauen- und Wimpernlifting',
+                'edu-block4-content9': 'Wimpernverlängerung',
+                'edu-block4-degree-label': 'Abschluss:',
+                'edu-block4-degree1': 'Basiszertifikate',
+                'edu-block4-degree2': '+ Bonus-Zertifikate: Lippenpigmentierung, Eyeliner (Permanent Make-up), Augenbrauen-Permanent Make-up, Augenbrauenzeichnen & -reinigung, Microblading',
+                'program-cosmetics-price': '3.500 €',
+                'program-face-price': '2.500 €',
+                'program-hairdresser-price': '3.500 €',
+                'program-trainer-price': '2.500 €',
+                'stat-number-years': '24',
+                'stat-number-customers': '8,000+',
+                'stat-number-programs': '5',
+                'contact-phone': '0163 9244456',
+                'contact-email': 'info@mail.gbc-halle.top',
+                'contact-website': 'gbc-halle.top',
             },
             en: {
                 'logo-text': 'Gasal Beauty Center',
-                'nav-home': 'Home',
+                'nav-home': 'Homepage',
                 'nav-about': 'About Us',
                 'nav-services': 'Services',
-                'nav-education': 'Professional Training',
+                'nav-education': 'Vocational Training',
                 'nav-contact': 'Contact',
                 'nav-booking': 'Book Appointment',
                 'hero-title': 'Gasal Beauty Center',
                 'hero-subtitle': 'Integrated Beauty Center for Beauty & Body Care',
-                'hero-cta': 'Book Appointment Now',
-                'stat-years': 'Years Experience',
+                'hero-cta': 'Book Your Appointment Now',
+                'stat-years': 'Years of Experience',
                 'stat-customers': 'Satisfied Customers',
                 'stat-programs': 'Training Programs',
                 'about-title': 'About Us',
-                'about-content': 'Our Beauty Center has been providing professional beauty and body care services for 24 years. With over 8,000 satisfied customers, we are proud to offer not only first-class treatments but also accredited professional training in the beauty sector.',
+                'about-content': 'Our beauty center has been offering professional beauty and body care services for 24 years. With over 8,000 satisfied customers, we are proud to provide not only top-notch treatments but also accredited vocational training in the beauty sector.',
                 'services-title': 'Services & Products',
-                'service-skincare': 'Skincare for All Skin Types',
-                'service-skincare-desc': 'Professional treatments for every skin type using the latest technologies.',
+                'service-skincare': 'Skin Care for All Skin Types',
                 'service-wholesale': 'Wholesale',
-                'service-wholesale-desc': 'Cosmetics, equipment & hairdressing materials available wholesale.',
                 'service-equipment': 'Equipment Sales',
-                'service-equipment-desc': 'Purchase & installment payment including certificate & training as a gift.',
-                'education-title': 'Professional Training Programs',
+                'education-title': 'Vocational Training Programs',
                 'program-diploma': 'Diploma Program',
-                'program-diploma-desc': '3–6 months • 8 certificates • Language: Arabic & Kurdish',
-                'program-diploma-features': 'Fat reduction, laser hair removal, teeth whitening, tattoo removal and more.',
                 'program-cosmetics': 'Professional Cosmetics',
-                'program-cosmetics-desc': '3–6 months • 8 certificates • 4 devices included',
-                'program-cosmetics-features': 'Dermapen, Plasma Pen, Hydrafacial, skin analysis and more.',
                 'program-face': 'Face Beauty Course',
-                'program-face-desc': '2 months • 8 certificates • 3 devices included',
-                'program-face-features': 'Microblading, eyelash extensions, brow lifting and more.',
-                'program-hairdresser': 'Hairdresser/Cosmetician',
-                'program-hairdresser-desc': '3–6 months • 6 certificates',
-                'program-hairdresser-features': 'Haircuts, bridal hairstyles, make-up, hair coloring and more.',
+                'program-hairdresser': 'Hairdresser/Beautician',
                 'program-trainer': 'Beauty Trainer Certificate',
-                'program-trainer-desc': '1 month • Professional Instructor',
-                'program-trainer-features': 'Training to become a beauty trainer with your own training opportunities.',
                 'contact-title': 'Location & Contact',
                 'address-label': 'Address:',
                 'phone-label': 'Phone:',
@@ -1473,57 +1679,164 @@
                 'label-notes': 'Additional Notes',
                 'submit-btn': 'Book Appointment',
                 'option-select': 'Please select a service',
-                'option-skincare': 'Skincare for All Skin Types',
-                'option-diploma': 'Diploma Program (€3,000)',
-                'option-cosmetics': 'Professional Cosmetics (€3,500)',
-                'option-face': 'Face Beauty Course (€2,500)',
-                'option-hairdresser': 'Hairdresser/Cosmetician (€3,500)',
-                'option-trainer': 'Beauty Trainer Certificate (€2,500)',
-                'option-consultation': 'Consultation',
-                'success-title': 'Appointment Successfully Booked!',
-                'success-text': 'Your booking confirmation has been sent to your email address. We look forward to your visit!',
-                'error-title': 'Booking Failed',
-                'error-text': 'There was a problem with your booking. Please try again or contact us directly.'
+                // Neue Dienstleistungsoptionen (aus <select id="service">)
+                'option-braut-makeup-haar': 'Bridal make-up & hair styling',
+                'option-abend-makeup-frisuren': 'Evening make-up & hairstyles',
+                'option-verleih-kleider': 'Rental & sale of bridal, evening and traditional dresses (incl. Kurdish dresses)',
+                'option-haarschnitt-foehnen-straehnen': 'Haircut, blow-dry, highlights',
+                'option-haarfaerbung': 'Hair coloring',
+                'option-haarprotein': 'Hair protein treatments',
+                'option-haarstyling': 'Professional hair stylings',
+                'option-schminken-anlass': 'Make-up for any occasion',
+                'option-augenbrauen-faden': 'Eyebrow plucking & tinting (thread technique)',
+                'option-wimpernverlaengerung-lifting': 'Eyelash extensions & lifting',
+                'option-microblading-browlifting': 'Microblading & brow lifting',
+                'option-permanent-makeup': 'Permanent make-up (eyeliner, lip pigmentation, eyebrows)',
+                'option-bb-glow': 'BB Glow treatment',
+                'option-hydrafacial': 'Hydrafacial treatment',
+                'option-gesichtsreinigung': 'Facial cleansing',
+                'option-hautpflege': 'Skin care',
+                'option-carbon-peeling': 'Carbon peeling: €70, 1 hr',
+                'option-kristallpeeling': 'Crystal peeling: €50, 30 min',
+                'option-peeling-gruen-algen': 'Peeling (green/algae): €70, 30 min',
+                'option-dermapen': 'Dermapen: €70, 40 min',
+                'option-plasma-pen': 'Plasma Pen: €25–70, 1 hr',
+                'option-beauty-injektion-glow': 'Beauty injection / Glow: €250, 30 min',
+                'option-mesotherapie-gesicht-haare': 'Mesotherapy face & hair: €200, 30 min',
+                'option-mesotherapie-haare': 'Mesotherapy hair: €150, 30 min',
+                'option-fettloesendes-injektionslipom-bauch-backen': 'Fat-dissolving injection lipoma (abdomen/cheeks): €70–150, 30 min',
+                'option-botox-stirn-augen-zornesfalten': 'Botox (forehead & eye area, frown lines): €250, 30 min',
+                'option-filler-lippen': 'Filler lips (1 ml): €250, 30 min',
+                'option-filler-lachfalten': 'Filler smile lines: €250, 30 min',
+                'option-fettloesendes-injektionslipom-bauch': 'Fat-dissolving injection lipoma abdomen: €150, 30 min',
+                'option-laser-achseln': 'Laser armpits: €35, 15 min',
+                'option-laser-haende': 'Laser hands (complete): €35, 10 min',
+                'option-laser-beine': 'Laser legs (complete): €60, 30 min; half legs: €35, 20 min',
+                'option-laser-gesicht': 'Laser face: €35, 20 min',
+                'option-laser-bikini': 'Laser bikini: €40, 20 min',
+                'option-laser-bauch-ruecken': 'Laser abdomen & back: €60, 30 min',
+                'option-laser-kinn-oberlippe': 'Laser chin & upper lip: €25, 5 min',
+                'option-laser-ganzkoerper': 'Laser permanent hair removal (whole body): €170, from 1.5 hrs, number of sessions depending on body',
+                'option-wimpernverlaengerung': 'Eyelash extensions: €50, 1 hr',
+                'option-augenbrauen-faerben': 'Eyebrow tinting: €30, 30 min',
+                'option-augenbrauen-zupfen-formen': 'Eyebrow plucking / shaping: €25, 15 min',
+                'option-microblading-2sitzungen': 'Microblading eyebrows (2 sessions): €150, 1 hr',
+                'option-augenbrauen-haerchen-2sitzungen': 'Eyebrow hair by hair (2 sessions): €170, 2 hrs, interval between sessions: 1 month',
+                'option-makeup-normal': 'Make-up normal: €35, 1 hr',
+                'option-braut-makeup': 'Bridal make-up: €70, 1 hr',
+                'option-naegel-nageldesign': 'Nails / nail design: from €35–50, 40 min',
+                'option-fusspflege': 'Foot care',
+                'option-zahnaufhellung': 'Teeth whitening: €50, 30 min, number of sessions depending on condition',
+                'option-fettverbrennung-geraet': 'Fat burning with device / body shaping: €70, 1 hr, number of sessions depending on condition',
+                'option-koerpermassage': 'Body massage',
+                'option-kollagenfaeden': 'Collagen threads',
+                'program-diploma-price': '€3,000',
+                // Education section (Block 1)
+                'edu-block1-title': 'Department 1: Skin and Cosmetic Treatments (Professional Cosmetics)',
+                'edu-block1-duration-label': 'Duration:',
+                'edu-block1-duration': '6 months',
+                'edu-block1-desc': 'Just two months after graduation, participants can open their own studio, work from home, or be employed in a beauty center.',
+                'edu-block1-content-label': 'Training content:',
+                'edu-block1-content1': 'Skin analysis',
+                'edu-block1-content2': 'Hair root analysis',
+                'edu-block1-content3': 'HydraFacial',
+                'edu-block1-content4': 'Dermapen (microneedling)',
+                'edu-block1-content5': 'Plasma Pen',
+                'edu-block1-content6': 'Algae peeling',
+                'edu-block1-content7': 'Green Peel (herbal peeling)',
+                'edu-block1-content8': 'Crystal peeling',
+                'edu-block1-content9': 'Collagen threads',
+                'edu-block1-content10': 'Fruit acid peeling',
+                'edu-block1-content11': 'Carbon peeling',
+                'edu-block1-content12': 'Cupping therapy (physiotherapy technique)',
+                'edu-block1-degree-label': 'Degree:',
+                'edu-block1-degree1': '12 basic certificates',
+                'edu-block1-degree2': '+ 5 bonus certificates: Oxygen Bubbles, Morpheus, Mesotherapy, BB Glow, Vascular Removal',
+                // Education section (Block 2)
+                'edu-block2-title': 'Department 2: Diploma in Laser and Radiation Technologies',
+                'edu-block2-duration-label': 'Duration:',
+                'edu-block2-duration': '4 months',
+                'edu-block2-content-label': 'Training content:',
+                'edu-block2-content1': 'Permanent hair removal with laser',
+                'edu-block2-content2': 'Fat reduction',
+                'edu-block2-content3': 'Teeth whitening',
+                'edu-block2-content4': 'Treatment of vascular occlusions',
+                'edu-block2-content5': 'Carbon peeling',
+                'edu-block2-content6': 'Tattoo removal',
+                'edu-block2-content7': 'Fractional laser (CO₂)',
+                'edu-block2-content8': 'HIFU (high-intensity focused ultrasound)',
+                'edu-block2-content9': 'FUS-Beflica',
+                'edu-block2-content10': 'Nail modeling',
+                'edu-block2-content11': 'Electroepilation (white hair)',
+                'edu-block2-degree-label': 'Degree:',
+                'edu-block2-degree1': '7 basic certificates',
+                'edu-block2-degree2': '+ 5 bonus certificates: Skin analysis, cupping therapy, Oxygen Bubbles, Mesotherapy for hair, Lip pigmentation',
+                // Education section (Block 3)
+                'edu-block3-title': 'Department 3: Medical Cosmetics',
+                'edu-block3-duration-label': 'Duration:',
+                'edu-block3-duration': '3 months – 1 day per week (10:00 – 15:00)',
+                'edu-block3-content-label': 'Training content:',
+                'edu-block3-content1': 'Skin treatments with hyaluron',
+                'edu-block3-content2': 'Growth stimulation for hair and face',
+                'edu-block3-content3': 'Injection treatments for fat dissolution (chin & abdomen)',
+                'edu-block3-content4': 'Mesotherapy injections',
+                'edu-block3-degree-label': 'Degree:',
+                'edu-block3-degree1': '7 basic certificates',
+                'edu-block3-degree2': '+ 3 bonus certificates: BB Face, Astaxanthin serum, Electroepilation (white hair)',
+                // Education section (Block 4)
+                'edu-block4-title': 'Department 4: Advanced Training for Hairdressers',
+                'edu-block4-duration-label': 'Duration:',
+                'edu-block4-duration': '2 months',
+                'edu-block4-content-label': 'Training content:',
+                'edu-block4-content1': 'Hair care with protein',
+                'edu-block4-content2': 'Hair straightening',
+                'edu-block4-content3': 'Hair coloring & highlighting techniques',
+                'edu-block4-content4': 'Haircuts & stylings',
+                'edu-block4-content5': 'Extensions',
+                'edu-block4-content6': 'Make-up',
+                'edu-block4-content7': 'Eyebrow styling',
+                'edu-block4-content8': 'Eyebrow and eyelash lifting',
+                'edu-block4-content9': 'Eyelash extensions',
+                'edu-block4-degree-label': 'Degree:',
+                'edu-block4-degree1': 'Basic certificates',
+                'edu-block4-degree2': '+ Bonus certificates: Lip pigmentation, Eyeliner (permanent make-up), Eyebrow permanent make-up, Eyebrow drawing & cleaning, Microblading',
+                'program-cosmetics-price': '€3,500',
+                'program-face-price': '€2,500',
+                'program-hairdresser-price': '€3,500',
+                'program-trainer-price': '€2,500',
+                'stat-number-years': '24',
+                'stat-number-customers': '8,000+',
+                'stat-number-programs': '5',
+                'contact-phone': '+49 163 9244456',
+                'contact-email': 'info@mail.gbc-halle.top',
+                'contact-website': 'gbc-halle.top',
             },
             ar: {
-                'logo-text': 'مركز جاسال للجمال',
-                'nav-home': 'الرئيسية',
+                'logo-text': 'مركز غزال للتجميل',
+                'nav-home': 'الصفحة الرئيسية',
                 'nav-about': 'معلومات عنا',
                 'nav-services': 'الخدمات',
                 'nav-education': 'التدريب المهني',
                 'nav-contact': 'اتصل بنا',
                 'nav-booking': 'احجز موعد',
-                'hero-title': 'مركز جاسال للجمال',
-                'hero-subtitle': 'مركز متكامل للجمال والعناية بالجسم',
+                'hero-title': 'مركز غزال للتجميل',
+                'hero-subtitle': 'مركز تجميل متكامل للعناية بالجمال والجسم',
                 'hero-cta': 'احجز موعدك الآن',
-                'stat-years': 'سنة خبرة',
-                'stat-customers': 'عميل راضي',
-                'stat-programs': 'برامج تدريبية',
+                'stat-years': 'سنوات من الخبرة',
+                'stat-customers': 'عملاء راضون',
+                'stat-programs': 'برامج التدريب',
                 'about-title': 'معلومات عنا',
-                'about-content': 'يقدم مركز الجمال الخاص بنا خدمات الجمال والعناية بالجسم المهنية منذ 24 عامًا. مع أكثر من 8000 عميل راضي، نحن فخورون بتقديم ليس فقط علاجات من الدرجة الأولى ولكن أيضًا التدريب المهني المعتمد في قطاع الجمال.',
+                'about-content': 'يقدم مركزنا للتجميل خدمات التجميل والعناية بالجسم منذ 24 عامًا. مع أكثر من 8000 عميل راضٍ، نفخر بتقديم علاجات عالية الجودة وتدريب مهني معتمد في مجال التجميل.',
                 'services-title': 'الخدمات والمنتجات',
                 'service-skincare': 'العناية بالبشرة لجميع أنواع البشرة',
-                'service-skincare-desc': 'علاجات مهنية لكل نوع من أنواع البشرة باستخدام أحدث التقنيات.',
-                'service-wholesale': 'تجارة الجملة',
-                'service-wholesale-desc': 'مستحضرات التجميل والمعدات ومواد تصفيف الشعر متوفرة بالجملة.',
+                'service-wholesale': 'الجملة',
                 'service-equipment': 'بيع المعدات',
-                'service-equipment-desc': 'الشراء والدفع بالتقسيط يشمل الشهادة والتدريب كهدية.',
                 'education-title': 'برامج التدريب المهني',
                 'program-diploma': 'برنامج الدبلوم',
-                'program-diploma-desc': '3-6 أشهر • 8 شهادات • اللغة: العربية والكردية',
-                'program-diploma-features': 'تقليل الدهون، إزالة الشعر بالليزر، تبييض الأسنان، إزالة الوشم والمزيد.',
                 'program-cosmetics': 'التجميل المهني',
-                'program-cosmetics-desc': '3-6 أشهر • 8 شهادات • 4 أجهزة متضمنة',
-                'program-cosmetics-features': 'ديرمابين، بلازما بين، هيدرافيشال، تحليل البشرة والمزيد.',
                 'program-face': 'دورة جمال الوجه',
-                'program-face-desc': 'شهرين • 8 شهادات • 3 أجهزة متضمنة',
-                'program-face-features': 'مايكروبليدنغ، تمديد الرموش، رفع الحواجب والمزيد.',
                 'program-hairdresser': 'مصفف الشعر/أخصائي التجميل',
-                'program-hairdresser-desc': '3-6 أشهر • 6 شهادات',
-                'program-hairdresser-features': 'قصات الشعر، تسريحات العروس، المكياج، صبغ الشعر والمزيد.',
                 'program-trainer': 'شهادة مدرب التجميل',
-                'program-trainer-desc': 'شهر واحد • مدرس مهني',
-                'program-trainer-features': 'التدريب لتصبح مدرب تجميل مع فرص التدريب الخاصة بك.',
                 'contact-title': 'الموقع والاتصال',
                 'address-label': 'العنوان:',
                 'phone-label': 'الهاتف:',
@@ -1540,17 +1853,198 @@
                 'label-notes': 'ملاحظات إضافية',
                 'submit-btn': 'احجز موعد',
                 'option-select': 'يرجى اختيار خدمة',
-                'option-skincare': 'العناية بالبشرة لجميع أنواع البشرة',
-                'option-diploma': 'برنامج الدبلوم (3.000 €)',
-                'option-cosmetics': 'التجميل المهني (3.500 €)',
-                'option-face': 'دورة جمال الوجه (2.500 €)',
-                'option-hairdresser': 'مصفف الشعر/أخصائي التجميل (3.500 €)',
-                'option-trainer': 'شهادة مدرب التجميل (2.500 €)',
-                'option-consultation': 'استشارة',
-                'success-title': 'تم حجز الموعد بنجاح!',
-                'success-text': 'تم إرسال تأكيد الحجز إلى عنوان بريدك الإلكتروني. نتطلع لزيارتك!',
-                'error-title': 'فشل الحجز',
-                'error-text': 'حدثت مشكلة في الحجز. يرجى المحاولة مرة أخرى أو الاتصال بنا مباشرة.'
+                // Neue Dienstleistungsoptionen (aus <select id="service">)
+                'option-braut-makeup-haar': 'مكياج العروس وتصفيف الشعر',
+                'option-abend-makeup-frisuren': 'مكياج السهرة وتسريحات الشعر',
+                'option-verleih-kleider': 'تأجير وبيع فساتين الزفاف والسهرات والتقليدية (بما في ذلك الكردية)',
+                'option-haarschnitt-foehnen-straehnen': 'قص الشعر، تجفيف، خصلات',
+                'option-haarfaerbung': 'صبغ الشعر',
+                'option-haarprotein': 'علاجات بروتين الشعر',
+                'option-haarstyling': 'تسريحات شعر احترافية',
+                'option-schminken-anlass': 'مكياج لجميع المناسبات',
+                'option-augenbrauen-faden': 'تنظيف وتلوين الحواجب (خيط)',
+                'option-wimpernverlaengerung-lifting': 'تمديد ورفع الرموش',
+                'option-microblading-browlifting': 'مايكروبليدينغ ورفع الحواجب',
+                'option-permanent-makeup': 'مكياج دائم (آيلاينر، تلوين الشفاه، الحواجب)',
+                'option-bb-glow': 'علاج بي بي جلو',
+                'option-hydrafacial': 'علاج هيدرافيشال',
+                'option-gesichtsreinigung': 'تنظيف الوجه',
+                'option-hautpflege': 'العناية بالبشرة',
+                'option-carbon-peeling': 'تقشير الكربون: 70 يورو، ساعة',
+                'option-kristallpeeling': 'تقشير الكريستال: 50 يورو، 30 دقيقة',
+                'option-peeling-gruen-algen': 'تقشير (أخضر/طحالب): 70 يورو، 30 دقيقة',
+                'option-dermapen': 'ديرمابين: 70 يورو، 40 دقيقة',
+                'option-plasma-pen': 'قلم البلازما: 25–70 يورو، ساعة',
+                'option-beauty-injektion-glow': 'حقن الجمال / جلو: 250 يورو، 30 دقيقة',
+                'option-mesotherapie-gesicht-haare': 'ميزوثيرابي للوجه والشعر: 200 يورو، 30 دقيقة',
+                'option-mesotherapie-haare': 'ميزوثيرابي للشعر: 150 يورو، 30 دقيقة',
+                'option-fettloesendes-injektionslipom-bauch-backen': 'حقن إذابة الدهون (البطن/الخدود): 70–150 يورو، 30 دقيقة',
+                'option-botox-stirn-augen-zornesfalten': 'بوتوكس (الجبهة ومنطقة العين، خطوط العبوس): 250 يورو، 30 دقيقة',
+                'option-filler-lippen': 'فيلر الشفاه (1 مل): 250 يورو، 30 دقيقة',
+                'option-filler-lachfalten': 'فيلر خطوط الابتسامة: 250 يورو، 30 دقيقة',
+                'option-fettloesendes-injektionslipom-bauch': 'حقن إذابة الدهون للبطن: 150 يورو، 30 دقيقة',
+                'option-laser-achseln': 'ليزر الإبطين: 35 يورو، 15 دقيقة',
+                'option-laser-haende': 'ليزر اليدين (كامل): 35 يورو، 10 دقائق',
+                'option-laser-beine': 'ليزر الساقين (كامل): 60 يورو، 30 دقيقة؛ نصف الساقين: 35 يورو، 20 دقيقة',
+                'option-laser-gesicht': 'ليزر الوجه: 35 يورو، 20 دقيقة',
+                'option-laser-bikini': 'ليزر البكيني: 40 يورو، 20 دقيقة',
+                'option-laser-bauch-ruecken': 'ليزر البطن والظهر: 60 يورو، 30 دقيقة',
+                'option-laser-kinn-oberlippe': 'ليزر الذقن والشفة العليا: 25 يورو، 5 دقائق',
+                'option-laser-ganzkoerper': 'إزالة الشعر بالليزر (كامل الجسم): 170 يورو، من 1.5 ساعة، عدد الجلسات حسب الجسم',
+                'option-wimpernverlaengerung': 'تمديد الرموش: 50 يورو، ساعة',
+                'option-augenbrauen-faerben': 'تلوين الحواجب: 30 يورو، 30 دقيقة',
+                'option-augenbrauen-zupfen-formen': 'تنظيف/تشكيل الحواجب: 25 يورو، 15 دقيقة',
+                'option-microblading-2sitzungen': 'مايكروبليدينغ للحواجب (جلستان): 150 يورو، ساعة',
+                'option-augenbrauen-haerchen-2sitzungen': 'شعرة شعرة للحواجب (جلستان): 170 يورو، ساعتان، الفاصل بين الجلسات: شهر',
+                'option-makeup-normal': 'مكياج عادي: 35 يورو، ساعة',
+                'option-braut-makeup': 'مكياج عروس: 70 يورو، ساعة',
+                'option-naegel-nageldesign': 'الأظافر / تصميم الأظافر: من 35–50 يورو، 40 دقيقة',
+                'option-fusspflege': 'العناية بالقدمين',
+                'option-zahnaufhellung': 'تبييض الأسنان: 50 يورو، 30 دقيقة، عدد الجلسات حسب الحالة',
+                'option-fettverbrennung-geraet': 'حرق الدهون بالجهاز / تشكيل الجسم: 70 يورو، ساعة، عدد الجلسات حسب الحالة',
+                'option-koerpermassage': 'تدليك الجسم',
+                'option-kollagenfaeden': 'خيوط الكولاجين',
+                'program-diploma-price': '٣٬٠٠٠ يورو',
+                // Education section (Block 1)
+                'edu-block1-title': 'القسم 1: علاجات الجلد والتجميل (تجميل مهني)',
+                'edu-block1-duration-label': 'المدة:',
+                'edu-block1-duration': '6 أشهر',
+                'edu-block1-desc': 'بعد شهرين فقط من التخرج يمكن للمشاركين فتح صالون خاص أو العمل من المنزل أو في مركز تجميل.',
+                'edu-block1-content-label': 'محتوى التدريب:',
+                'edu-block1-content1': 'تحليل الجلد',
+                'edu-block1-content2': 'تحليل جذور الشعر',
+                'edu-block1-content3': 'هايدرافيشال',
+                'edu-block1-content4': 'ديرمابين (مايكرونيدلينغ)',
+                'edu-block1-content5': 'قلم البلازما',
+                'edu-block1-content6': 'تقشير الطحالب',
+                'edu-block1-content7': 'تقشير الأعشاب',
+                'edu-block1-content8': 'تقشير الكريستال',
+                'edu-block1-content9': 'خيوط الكولاجين',
+                'edu-block1-content10': 'تقشير الفواكه',
+                'edu-block1-content11': 'تقشير الكربون',
+                'edu-block1-content12': 'علاج الحجامة (تقنية العلاج الطبيعي)',
+                'edu-block1-degree-label': 'الشهادة:',
+                'edu-block1-degree1': '12 شهادة أساسية',
+                'edu-block1-degree2': '+ 5 شهادات إضافية: Oxygen Bubbles, Morpheus, Mesotherapie, BB Glow, Vascular Removal',
+                // Education section (Block 2)
+                'edu-block2-title': 'القسم 2: دبلوم في تقنيات الليزر والأشعة',
+                'edu-block2-duration-label': 'المدة:',
+                'edu-block2-duration': '4 أشهر',
+                'edu-block2-content-label': 'محتوى التدريب:',
+                'edu-block2-content1': 'إزالة الشعر الدائمة بالليزر',
+                'edu-block2-content2': 'تقليل الدهون',
+                'edu-block2-content3': 'تبييض الأسنان',
+                'edu-block2-content4': 'علاج انسداد الأوعية الدموية',
+                'edu-block2-content5': 'تقشير الكربون',
+                'edu-block2-content6': 'إزالة الوشم',
+                'edu-block2-content7': 'الليزر الجزئي (CO₂)',
+                'edu-block2-content8': 'الموجات فوق الصوتية المركزة عالية الكثافة (HIFU)',
+                'edu-block2-content9': 'FUS-Beflica',
+                'edu-block2-content10': 'تصميم الأظافر',
+                'edu-block2-content11': 'إزالة الشعر الكهربائي (الشعر الأبيض)',
+                'edu-block2-degree-label': 'الشهادة:',
+                'edu-block2-degree1': '7 شهادات أساسية',
+                'edu-block2-degree2': '+ 5 شهادات إضافية: تحليل الجلد، علاج الحجامة، Oxygen Bubbles، ميزوثيرابي للشعر، تلوين الشفاه',
+                // Education section (Block 3)
+                'edu-block3-title': 'القسم 3: التجميل الطبي',
+                'edu-block3-duration-label': 'المدة:',
+                'edu-block3-duration': '3 أشهر – يوم واحد في الأسبوع (10:00 – 15:00)',
+                'edu-block3-content-label': 'محتوى التدريب:',
+                'edu-block3-content1': 'علاجات الجلد بحمض الهيالورونيك',
+                'edu-block3-content2': 'تحفيز النمو للشعر والوجه',
+                'edu-block3-content3': 'علاجات الحقن لإذابة الدهون (الذقن والبطن)',
+                'edu-block3-content4': 'حقن الميزوثيرابي',
+                'edu-block3-degree-label': 'الشهادة:',
+                'edu-block3-degree1': '7 شهادات أساسية',
+                'edu-block3-degree2': '+ 3 شهادات إضافية: BB Face، مصل أستازانتين، إزالة الشعر الكهربائي (الشعر الأبيض)',
+                // Education section (Block 4)
+                'edu-block4-title': 'القسم 4: تدريب متقدم لمصففي الشعر',
+                'edu-block4-duration-label': 'المدة:',
+                'edu-block4-duration': 'شهران',
+                'edu-block4-content-label': 'محتوى التدريب:',
+                'edu-block4-content1': 'العناية بالشعر بالبروتين',
+                'edu-block4-content2': 'تمليس الشعر',
+                'edu-block4-content3': 'تقنيات صبغ الشعر والخصلات',
+                'edu-block4-content4': 'قصات وتسريحات الشعر',
+                'edu-block4-content5': 'إكستنشن',
+                'edu-block4-content6': 'مكياج',
+                'edu-block4-content7': 'تنسيق الحواجب',
+                'edu-block4-content8': 'رفع الحواجب والرموش',
+                'edu-block4-content9': 'تمديد الرموش',
+                'edu-block4-degree-label': 'الشهادة:',
+                'edu-block4-degree1': 'شهادات أساسية',
+                'edu-block4-degree2': '+ شهادات إضافية: تلوين الشفاه، آيلاينر (مكياج دائم)، مكياج دائم للحواجب، رسم وتنظيف الحواجب، مايكروبليدينغ',
+                'program-cosmetics-price': '٣٬٥٠٠ يورو',
+                'program-face-price': '٢٬٥٠٠ يورو',
+                'program-hairdresser-price': '٣٬٥٠٠ يورو',
+                'program-trainer-price': '٢٬٥٠٠ يورو',
+                'stat-number-years': '٢٤',
+                'stat-number-customers': '٨٬٠٠٠+',
+                'stat-number-programs': '٥',
+                'contact-phone': '+٤٩ ١٦٣ ٩٢٤٤٤٥٦',
+                'contact-email': 'info@mail.gbc-halle.top',
+                'contact-website': 'gbc-halle.top',
+                'option-braut-makeup-haar': 'مكياج العروس وتصفيف الشعر',
+                'option-abend-makeup-frisuren': 'مكياج السهرة وتسريحات الشعر',
+                'option-verleih-kleider': 'تأجير وبيع فساتين الزفاف والسهرات والتقليدية (بما في ذلك الكردية)',
+                'option-haarschnitt-foehnen-straehnen': 'قص الشعر، تجفيف، خصلات',
+                'option-haarfaerbung': 'صبغ الشعر',
+                'option-haarprotein': 'علاجات بروتين الشعر',
+                'option-haarstyling': 'تسريحات شعر احترافية',
+                'option-schminken-anlass': 'مكياج لجميع المناسبات',
+                'option-augenbrauen-faden': 'تنظيف وتلوين الحواجب (خيط)',
+                'option-wimpernverlaengerung-lifting': 'تمديد ورفع الرموش',
+                'option-microblading-browlifting': 'مايكروبليدينغ ورفع الحواجب',
+                'option-permanent-makeup': 'مكياج دائم (آيلاينر، تلوين الشفاه، الحواجب)',
+                'option-bb-glow': 'علاج بي بي جلو',
+                'option-hydrafacial': 'علاج هيدرافيشال',
+                'option-gesichtsreinigung': 'تنظيف الوجه',
+                'option-hautpflege': 'العناية بالبشرة',
+                'option-carbon-peeling': 'تقشير الكربون: 70 يورو، ساعة',
+                'option-kristallpeeling': 'تقشير الكريستال: 50 يورو، 30 دقيقة',
+                'option-peeling-gruen-algen': 'تقشير (أخضر/طحالب): 70 يورو، 30 دقيقة',
+                'option-dermapen': 'ديرمابين: 70 يورو، 40 دقيقة',
+                'option-plasma-pen': 'قلم البلازما: 25–70 يورو، ساعة',
+                'option-beauty-injektion-glow': 'حقن الجمال / جلو: 250 يورو، 30 دقيقة',
+                'option-mesotherapie-gesicht-haare': 'ميزوثيرابي للوجه والشعر: 200 يورو، 30 دقيقة',
+                'option-mesotherapie-haare': 'ميزوثيرابي للشعر: 150 يورو، 30 دقيقة',
+                'option-fettloesendes-injektionslipom-bauch-backen': 'حقن إذابة الدهون (البطن/الخدود): 70–150 يورو، 30 دقيقة',
+                'option-botox-stirn-augen-zornesfalten': 'بوتوكس (الجبهة ومنطقة العين، خطوط العبوس): 250 يورو، 30 دقيقة',
+                'option-filler-lippen': 'فيلر الشفاه (1 مل): 250 يورو، 30 دقيقة',
+                'option-filler-lachfalten': 'فيلر خطوط الابتسامة: 250 يورو، 30 دقيقة',
+                'option-fettloesendes-injektionslipom-bauch': 'حقن إذابة الدهون للبطن: 150 يورو، 30 دقيقة',
+                'option-laser-achseln': 'ليزر الإبطين: 35 يورو، 15 دقيقة',
+                'option-laser-haende': 'ليزر اليدين (كامل): 35 يورو، 10 دقائق',
+                'option-laser-beine': 'ليزر الساقين (كامل): 60 يورو، 30 دقيقة؛ نصف الساقين: 35 يورو، 20 دقيقة',
+                'option-laser-gesicht': 'ليزر الوجه: 35 يورو، 20 دقيقة',
+                'option-laser-bikini': 'ليزر البكيني: 40 يورو، 20 دقيقة',
+                'option-laser-bauch-ruecken': 'ليزر البطن والظهر: 60 يورو، 30 دقيقة',
+                'option-laser-kinn-oberlippe': 'ليزر الذقن والشفة العليا: 25 يورو، 5 دقائق',
+                'option-laser-ganzkoerper': 'إزالة الشعر بالليزر (كامل الجسم): 170 يورو، من 1.5 ساعة، عدد الجلسات حسب الجسم',
+                'option-wimpernverlaengerung': 'تمديد الرموش: 50 يورو، ساعة',
+                'option-augenbrauen-faerben': 'تلوين الحواجب: 30 يورو، 30 دقيقة',
+                'option-augenbrauen-zupfen-formen': 'تنظيف/تشكيل الحواجب: 25 يورو، 15 دقيقة',
+                'option-microblading-2sitzungen': 'مايكروبليدينغ للحواجب (جلستان): 150 يورو، ساعة',
+                'option-augenbrauen-haerchen-2sitzungen': 'شعرة شعرة للحواجب (جلستان): 170 يورو، ساعتان، الفاصل بين الجلسات: شهر',
+                'option-makeup-normal': 'مكياج عادي: 35 يورو، ساعة',
+                'option-braut-makeup': 'مكياج عروس: 70 يورو، ساعة',
+                'option-naegel-nageldesign': 'الأظافر / تصميم الأظافر: من 35–50 يورو، 40 دقيقة',
+                'option-fusspflege': 'العناية بالقدمين',
+                'option-zahnaufhellung': 'تبييض الأسنان: 50 يورو، 30 دقيقة، عدد الجلسات حسب الحالة',
+                'option-fettverbrennung-geraet': 'حرق الدهون بالجهاز / تشكيل الجسم: 70 يورو، ساعة، عدد الجلسات حسب الحالة',
+                'option-koerpermassage': 'تدليك الجسم',
+                'option-kollagenfaeden': 'خيوط الكولاجين',
+                'program-diploma-price': '٣٬٠٠٠ يورو',
+                'program-cosmetics-price': '٣٬٥٠٠ يورو',
+                'program-face-price': '٢٬٥٠٠ يورو',
+                'program-hairdresser-price': '٣٬٥٠٠ يورو',
+                'program-trainer-price': '٢٬٥٠٠ يورو',
+                'stat-number-years': '٢٤',
+                'stat-number-customers': '٨٬٠٠٠+',
+                'stat-number-programs': '٥',
+                'contact-phone': '+٤٩ ١٦٣ ٩٢٤٤٤٥٦',
+                'contact-email': 'info@mail.gbc-halle.top',
+                'contact-website': 'gbc-halle.top',
             }
         };
 
@@ -1589,6 +2083,7 @@
             selectedTimeSlot = null;
             updateTimeSlots();
             hideMessages();
+            document.getElementById('bookingForm').style.display = 'block';
         }
 
         function hideMessages() {
@@ -1655,118 +2150,263 @@ async function sendBookingConfirmation(bookingData) {
             return 'GBC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
         }
 
-        async function handleBookingSubmit(event) {
+        // Remove async handler for Formspree, use default submit
+        function handleBookingSubmit(event) {
             event.preventDefault();
-            
+            // Validate required fields and selected time
+            const selectedTime = document.getElementById('selectedTime').value;
+            if (!selectedTime) {
+                alert(currentLanguage === 'de' ? 'Bitte wählen Sie eine Uhrzeit.' : currentLanguage === 'en' ? 'Please select a time.' : 'يرجى اختيار الوقت.');
+                return false;
+            }
             const submitBtn = document.getElementById('submit-btn');
-            const originalText = submitBtn.textContent;
-            
-            // Disable submit button and show loading
             submitBtn.disabled = true;
-            submitBtn.textContent = currentLanguage === 'de' ? 'Wird gebucht...' : 
-                                  currentLanguage === 'en' ? 'Booking...' : 'جاري الحجز...';
-            
-            hideMessages();
-            
-            try {
-                // Get form data
-                const formData = new FormData(event.target);
-                const bookingData = {
-                    id: generateBookingId(),
-                    firstName: formData.get('firstName'),
-                    lastName: formData.get('lastName'),
-                    email: formData.get('email'),
-                    phone: formData.get('phone'),
-                    service: formData.get('service'),
-                    date: formData.get('date'),
-                    time: selectedTimeSlot,
-                    notes: formData.get('notes'),
-                    timestamp: new Date().toISOString()
-                };
-                
-                // Validate required fields
-                if (!bookingData.firstName || !bookingData.lastName || !bookingData.email || 
-                    !bookingData.phone || !bookingData.service || !bookingData.date || !bookingData.time) {
-                    throw new Error('Missing required fields');
+            submitBtn.textContent = currentLanguage === 'de' ? 'Wird gebucht...' : currentLanguage === 'en' ? 'Booking...' : 'جاري الحجز...';
+
+            // Gather form data
+            const form = document.getElementById('bookingForm');
+            const formData = new FormData(form);
+
+            fetch('https://formspree.io/f/mrblwpel', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
                 }
-                
-                // Mark time slot as booked
-                const slotKey = `${bookingData.date}-${bookingData.time}`;
-                bookedSlots[slotKey] = true;
-                
-                // Send confirmation email (simulated)
-                await sendBookingConfirmation(bookingData);
-                
-                // Show success message
-                document.getElementById('successMessage').style.display = 'block';
-                document.getElementById('bookingForm').style.display = 'none';
-                
-                // Update time slots to reflect booking
-                updateTimeSlots();
-                
-            } catch (error) {
-                console.error('Booking error:', error);
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show success message, hide form
+                    document.getElementById('successMessage').style.display = 'block';
+                    form.style.display = 'none';
+                    // Remove any hash or query string that Formspree might add
+                    if (window.location.hash || window.location.search) {
+                        history.replaceState(null, '', window.location.pathname);
+                    }
+                } else {
+                    return response.json().then(data => { throw data; });
+                }
+            })
+            .catch(error => {
                 document.getElementById('errorMessage').style.display = 'block';
-            } finally {
-                // Re-enable submit button
+            })
+            .finally(() => {
                 submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
+                submitBtn.textContent = translations[currentLanguage]['submit-btn'] || 'Termin buchen';
+            });
+            return false;
         }
 
-        function changeLanguage(lang) {
-            currentLanguage = lang;
-            
-            // Update active flag
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            const targetBtn = document.querySelector('.lang-btn.flag-' + (lang === 'en' ? 'us' : lang));
-            if (targetBtn) {
-                targetBtn.classList.add('active');
-            }
-            
-            // Update text content
-            const texts = translations[lang];
-            for (const id in texts) {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = texts[id];
+
+function changeLanguage(lang) {
+    currentLanguage = lang;
+
+    // Update active flag
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    const targetBtn = document.querySelector('.lang-btn.flag-' + (lang === 'en' ? 'us' : lang));
+    if (targetBtn) {
+        targetBtn.classList.add('active');
+    }
+
+    // Get translation object for selected language
+    const texts = translations[lang];
+
+    // Update all elements whose id matches a key in translations[lang]
+    Object.keys(texts).forEach(function(id) {
+        // Update all elements with this id (in case of duplicates)
+        const elements = document.querySelectorAll('#' + CSS.escape(id));
+        elements.forEach(function(element) {
+            // If it's an input or textarea, update placeholder if needed
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                if (element.placeholder !== undefined) {
+                    element.placeholder = texts[id];
                 }
-            }
-            
-            // Change text direction for Arabic
-            if (lang === 'ar') {
-                document.body.style.direction = 'rtl';
-                document.body.style.textAlign = 'right';
             } else {
-                document.body.style.direction = 'ltr';
-                document.body.style.textAlign = 'left';
+                element.textContent = texts[id];
             }
-            
-            // Update document language
-            document.documentElement.lang = lang;
+        });
+    });
+
+    // Update placeholders for booking form fields (for backward compatibility)
+    if (lang === 'de') {
+        document.getElementById('firstName').placeholder = 'Ihr Vorname';
+        document.getElementById('lastName').placeholder = 'Ihr Nachname';
+        document.getElementById('email').placeholder = 'ihre.email@beispiel.com';
+        document.getElementById('phone').placeholder = '+49 123 456789';
+        document.getElementById('notes').placeholder = 'Besondere Wünsche oder Anmerkungen...';
+    } else if (lang === 'en') {
+        document.getElementById('firstName').placeholder = 'Your first name';
+        document.getElementById('lastName').placeholder = 'Your last name';
+        document.getElementById('email').placeholder = 'your.email@example.com';
+        document.getElementById('phone').placeholder = '+49 123 456789';
+        document.getElementById('notes').placeholder = 'Special requests or comments...';
+    } else if (lang === 'ar') {
+        document.getElementById('firstName').placeholder = 'الاسم الأول';
+        document.getElementById('lastName').placeholder = 'اسم العائلة';
+        document.getElementById('email').placeholder = 'your@email.com';
+        document.getElementById('phone').placeholder = '+49 123 456789';
+        document.getElementById('notes').placeholder = 'ملاحظات أو طلبات خاصة...';
+    }
+
+    // Update select options for service
+    const serviceSelect = document.getElementById('service');
+    if (serviceSelect) {
+        // Update the first option (Bitte wählen...)
+        const selectOption = document.getElementById('option-select');
+        if (selectOption) {
+            selectOption.textContent = texts['option-select'] || selectOption.textContent;
         }
 
-        function scrollToSection(sectionId) {
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+        // Define optgroup label translations
+        var optgroupLabels = [
+            {
+                de: 'Braut- & Abendstyling',
+                en: 'Bridal & Evening Styling',
+                ar: 'تصفيف العرائس والسهرات'
+            },
+            {
+                de: 'Haarpflege & Styling',
+                en: 'Hair Care & Styling',
+                ar: 'العناية بالشعر والتصفيف'
+            },
+            {
+                de: 'Beauty & Kosmetik',
+                en: 'Beauty & Cosmetics',
+                ar: 'الجمال والتجميل'
+            },
+            {
+                de: 'Botox & Filler',
+                en: 'Botox & Filler',
+                ar: 'البوتوكس والفيلر'
+            },
+            {
+                de: 'Haarentfernung & Laser',
+                en: 'Hair Removal & Laser',
+                ar: 'إزالة الشعر والليزر'
+            },
+            {
+                de: 'Wimpern & Augenbrauen',
+                en: 'Lashes & Brows',
+                ar: 'الرموش والحواجب'
+            },
+            {
+                de: 'Make-up & Nägel',
+                en: 'Make-up & Nails',
+                ar: 'المكياج والأظافر'
+            },
+            {
+                de: 'Fußpflege',
+                en: 'Foot Care',
+                ar: 'العناية بالقدمين'
+            },
+            {
+                de: 'Zahnpflege',
+                en: 'Dental Care',
+                ar: 'العناية بالأسنان'
+            },
+            {
+                de: 'Body Treatments & Massagen',
+                en: 'Body Treatments & Massages',
+                ar: 'علاجات الجسم والتدليك'
+            }
+        ];
+        var optgroups = serviceSelect.getElementsByTagName('optgroup');
+        for (var g = 0; g < optgroups.length; g++) {
+            if (optgroupLabels[g] && optgroupLabels[g][lang]) {
+                optgroups[g].label = optgroupLabels[g][lang];
             }
         }
+        // Update options
+        var optionMap = [
+            'option-braut-makeup-haar',
+            'option-abend-makeup-frisuren',
+            'option-verleih-kleider',
+            'option-haarschnitt-foehnen-straehnen',
+            'option-haarfaerbung',
+            'option-haarprotein',
+            'option-haarstyling',
+            'option-schminken-anlass',
+            'option-augenbrauen-faden',
+            'option-wimpernverlaengerung-lifting',
+            'option-microblading-browlifting',
+            'option-permanent-makeup',
+            'option-bb-glow',
+            'option-hydrafacial',
+            'option-gesichtsreinigung',
+            'option-hautpflege',
+            'option-carbon-peeling',
+            'option-kristallpeeling',
+            'option-peeling-gruen-algen',
+            'option-dermapen',
+            'option-plasma-pen',
+            'option-beauty-injektion-glow',
+            'option-mesotherapie-gesicht-haare',
+            'option-mesotherapie-haare',
+            'option-fettloesendes-injektionslipom-bauch-backen',
+            'option-botox-stirn-augen-zornesfalten',
+            'option-filler-lippen',
+            'option-filler-lachfalten',
+            'option-fettloesendes-injektionslipom-bauch',
+            'option-laser-achseln',
+            'option-laser-haende',
+            'option-laser-beine',
+            'option-laser-gesicht',
+            'option-laser-bikini',
+            'option-laser-bauch-ruecken',
+            'option-laser-kinn-oberlippe',
+            'option-laser-ganzkoerper',
+            'option-wimpernverlaengerung',
+            'option-augenbrauen-faerben',
+            'option-augenbrauen-zupfen-formen',
+            'option-microblading-2sitzungen',
+            'option-augenbrauen-haerchen-2sitzungen',
+            'option-makeup-normal',
+            'option-braut-makeup',
+            'option-naegel-nageldesign',
+            'option-fusspflege',
+            'option-zahnaufhellung',
+            'option-fettverbrennung-geraet',
+            'option-koerpermassage',
+            'option-kollagenfaeden'
+        ];
+        var optionIndex = 0;
+        for (var g = 0; g < optgroups.length; g++) {
+            var options = optgroups[g].getElementsByTagName('option');
+            for (var o = 0; o < options.length; o++) {
+                var key = optionMap[optionIndex];
+                if (translations[lang][key]) {
+                    options[o].textContent = translations[lang][key];
+                }
+                optionIndex++;
+            }
+        }
+        // Update the select placeholder
+        var selectPlaceholder = document.getElementById('option-select');
+        if (selectPlaceholder) {
+            selectPlaceholder.textContent = translations[lang]['option-select'];
+        }
+        // Update input placeholders
+        var firstName = document.getElementById('firstName');
+        if (firstName) firstName.placeholder = translations[lang]['label-firstname'] || '';
+        var lastName = document.getElementById('lastName');
+        if (lastName) lastName.placeholder = translations[lang]['label-lastname'] || '';
+        var email = document.getElementById('email');
+        if (email) email.placeholder = translations[lang]['label-email'] || '';
+        var phone = document.getElementById('phone');
+        if (phone) phone.placeholder = translations[lang]['label-phone'] || '';
+        var notes = document.getElementById('notes');
+        if (notes) notes.placeholder = translations[lang]['label-notes'] || '';
+    }
+}
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             changeLanguage('de');
             setMinDate();
-            
-            // Set up form submission
+            // Set up form submission for Formspree
             document.getElementById('bookingForm').addEventListener('submit', handleBookingSubmit);
-            
             // Set up date change handler
             document.getElementById('date').addEventListener('change', updateTimeSlots);
-            
             // Close modal when clicking outside
             window.onclick = function(event) {
                 const modal = document.getElementById('bookingModal');
@@ -1774,106 +2414,10 @@ async function sendBookingConfirmation(bookingData) {
                     closeBookingModal();
                 }
             };
-            
             // Initialize time slots
             updateTimeSlots();
         });
-    </script>
-
-<script>
-const translations = {
-  de: {
-    bookingTitle: "Termin buchen",
-    labelFirstname: "Vorname *",
-    labelLastname: "Nachname *",
-    labelEmail: "E-Mail *",
-    labelPhone: "Telefonnummer *",
-    labelService: "Dienstleistung *",
-    optionSelect: "Bitte wählen Sie eine Dienstleistung",
-    optionSkincare: "Hautpflege für alle Hauttypen",
-    optionDiploma: "Diplomprogramm (3.000 €)",
-    optionCosmetics: "Fachkosmetik (3.500 €)",
-    optionFace: "Face-Beauty-Kurs (2.500 €)",
-    optionHairdresser: "Friseur/Kosmetiker (3.500 €)",
-    optionTrainer: "Beauty-Trainer Zertifikat (2.500 €)",
-    optionConsultation: "Beratungsgespräch",
-    labelDate: "Wunschdatum *",
-    labelTime: "Wunschzeit *"
-  },
-  en: {
-    bookingTitle: "Book Appointment",
-    labelFirstname: "First Name *",
-    labelLastname: "Last Name *",
-    labelEmail: "Email *",
-    labelPhone: "Phone Number *",
-    labelService: "Service *",
-    optionSelect: "Please select a service",
-    optionSkincare: "Skincare for all skin types",
-    optionDiploma: "Diploma Program (€3,000)",
-    optionCosmetics: "Cosmetology (€3,500)",
-    optionFace: "Face Beauty Course (€2,500)",
-    optionHairdresser: "Hairdresser/Cosmetician (€3,500)",
-    optionTrainer: "Beauty Trainer Certificate (€2,500)",
-    optionConsultation: "Consultation",
-    labelDate: "Preferred Date *",
-    labelTime: "Preferred Time *"
-  },
-  ar: {
-    bookingTitle: "حجز موعد",
-    labelFirstname: "الاسم الأول *",
-    labelLastname: "اسم العائلة *",
-    labelEmail: "البريد الإلكتروني *",
-    labelPhone: "رقم الهاتف *",
-    labelService: "الخدمة *",
-    optionSelect: "يرجى اختيار الخدمة",
-    optionSkincare: "العناية بالبشرة لجميع أنواع البشرة",
-    optionDiploma: "برنامج الدبلوم (3,000 €)",
-    optionCosmetics: "التجميل (3,500 €)",
-    optionFace: "دورة جمال الوجه (2,500 €)",
-    optionHairdresser: "حلاق/خبير تجميل (3,500 €)",
-    optionTrainer: "شهادة مدرب تجميل (2,500 €)",
-    optionConsultation: "استشارة",
-    labelDate: "التاريخ المطلوب *",
-    labelTime: "الوقت المطلوب *"
-  }
-};
-
-function changeLanguage(lang) {
-  // Buttons aktualisieren
-  document.querySelectorAll(".lang-btn").forEach(btn => btn.classList.remove("active"));
-  document.querySelector(`.flag-${lang === "de" ? "de" : lang === "en" ? "us" : "sa"}`).classList.add("active");
-
-  // Texte ersetzen
-  document.getElementById("booking-title").innerText = translations[lang].bookingTitle;
-  document.getElementById("label-firstname").innerText = translations[lang].labelFirstname;
-  document.getElementById("label-lastname").innerText = translations[lang].labelLastname;
-  document.getElementById("label-email").innerText = translations[lang].labelEmail;
-  document.getElementById("label-phone").innerText = translations[lang].labelPhone;
-  document.getElementById("label-service").innerText = translations[lang].labelService;
-
-  // Select-Optionen
-  document.getElementById("option-select").innerText = translations[lang].optionSelect;
-  document.getElementById("option-skincare").innerText = translations[lang].optionSkincare;
-  document.getElementById("option-diploma").innerText = translations[lang].optionDiploma;
-  document.getElementById("option-cosmetics").innerText = translations[lang].optionCosmetics;
-  document.getElementById("option-face").innerText = translations[lang].optionFace;
-  document.getElementById("option-hairdresser").innerText = translations[lang].optionHairdresser;
-  document.getElementById("option-trainer").innerText = translations[lang].optionTrainer;
-  document.getElementById("option-consultation").innerText = translations[lang].optionConsultation;
-
-  document.getElementById("label-date").innerText = translations[lang].labelDate;
-  document.getElementById("label-time").innerText = translations[lang].labelTime;
-
-  // RTL für Arabisch
-  if (lang === "ar") {
-    document.body.setAttribute("dir", "rtl");
-  } else {
-    document.body.removeAttribute("dir");
-  }
-}
 </script>
 
 </body>
-
 </html>
-                '
